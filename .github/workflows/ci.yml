@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI Pipeline with ChatOps
 
 on:
   push:
@@ -17,7 +17,18 @@ jobs:
         run: echo "Building DevOps Web Application"
 
       - name: Test step
-        run: echo "No tests configured"
+        run: echo "Running tests"
 
-      - name: CI completed
-        run: echo "CI Pipeline finished successfully"
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"✅ CI SUCCESS: devops-webapp build passed"}' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data '{"text":"❌ CI FAILURE: devops-webapp build failed"}' \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
